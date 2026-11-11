@@ -1,0 +1,93 @@
+# ============================================
+# Antares - realistic movement strategies demo
+# ============================================
+# Units: positions in meters (x = east, y = north, radar at the origin),
+# angles in radians counter-clockwise from east (0 = east, 1.5708 = north),
+# speeds in m/s, times in seconds, turn rates in rad/s.
+# Integers are accepted wherever a number is expected (speed = 5 == speed = 5.0).
+
+[antares.simulation]
+emission_interval = 20
+controller_bind_addr = "0.0.0.0:17394"
+
+# --------------------------------------------
+# Ship 0 - zigzag (S-shaped course)
+# heading(t) = angle + amplitude * sin(2*pi*t / period + phase)
+# With phase = pi/2 (default) the track is centered on the base line:
+# lateral offset within +-speed*amplitude*period/(2*pi) = +-15 m (~14.7 m here).
+# The base course passes ~150 m from the radar at t ~ 150 s and leaves the
+# 1000 m radar range at t ~ 465 s.
+# --------------------------------------------
+[[antares.simulation.initial_ships]]
+type = "zigzag"
+initial_position = [-600.0, -350.0]
+speed = 4.0
+angle = 0.5236          # base course: 30 degrees (ENE)
+amplitude = 0.6         # +-34 degrees around the base course
+period = 40.0           # seconds per full S
+phase = 1.5707963267948966  # pi/2 (default): centered; 0 = all on the left side
+
+# --------------------------------------------
+# Ship 1 - route (straight legs + turns)
+# Rectangular patrol: 25 s straight, turn left 90 deg, 12 s straight, turn
+# left 90 deg, ... Turns take |turn| / turn_rate = 7.85 s. Repeats forever.
+# turn > 0 = left / counter-clockwise, turn < 0 = right / clockwise.
+# --------------------------------------------
+[[antares.simulation.initial_ships]]
+type = "route"
+initial_position = [150.0, 150.0]
+speed = 5.0
+angle = 0.0             # initial course: east
+turn_rate = 0.2         # rad/s (default 0.2)
+repeat = true           # (default true)
+legs = [
+    { duration = 25.0, turn = 1.5707963267948966 },
+    { duration = 12.0, turn = 1.5707963267948966 },
+    { duration = 25.0, turn = 1.5707963267948966 },
+    { duration = 12.0, turn = 1.5707963267948966 },
+]
+
+# --------------------------------------------
+# Ship 2 - waypoints (patrol through points)
+# Turning radius = speed / turn_rate = 40 m.
+# --------------------------------------------
+[[antares.simulation.initial_ships]]
+type = "waypoints"
+initial_position = [0.0, 300.0]
+speed = 6.0
+points = [[-100.0, 450.0], [-400.0, 450.0], [-400.0, 250.0], [-100.0, 250.0]]
+turn_rate = 0.15        # rad/s (default 0.2)
+arrival_radius = 20.0   # m
+repeat = true           # (default true); false = stop at the last point
+
+# --------------------------------------------
+# Ship 3 - drift (smooth, reproducible random walk)
+# New random course/speed every change_every seconds, reached smoothly.
+# Turns back towards the center beyond 80 % of the radius.
+# --------------------------------------------
+[[antares.simulation.initial_ships]]
+type = "drift"
+initial_position = [200.0, -250.0]
+speed = 4.0
+speed_jitter = 0.25     # speed varies within +-25 %
+max_turn_rate = 0.08    # rad/s
+change_every = 12.0     # s
+seed = 42               # optional; without it the seed is derived from the ship index
+center = [200.0, -250.0]
+radius = 500.0          # m
+
+# ============================================
+# Antares Radar Config
+# ============================================
+
+[antares.radar]
+bind_addr = "0.0.0.0:17396"
+
+[antares.radar.detector]
+range = 1000.0
+speed = 0.0
+angle = 0.0
+start_coordinates = [4.0, -72.0]
+
+[antares.radar.broadcast]
+type = "tcp"

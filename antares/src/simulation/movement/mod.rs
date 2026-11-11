@@ -1,11 +1,20 @@
 mod circle;
+mod drift;
+mod kinematics;
 mod line;
 mod random;
+mod route;
 mod stationary;
 mod strategy;
+mod waypoints;
+mod zigzag;
 
 pub use circle::CircleMovement;
+pub use drift::{seed_for_ship, DriftMovement, DriftParams};
 pub use line::LineMovement;
 pub use random::RandomMovement;
+pub use route::{RouteLeg, RouteMovement};
 pub use stationary::StationaryMovement;
 pub use strategy::{MovementCommand, MovementStrategy};
+pub use waypoints::WaypointsMovement;
+pub use zigzag::ZigzagMovement;

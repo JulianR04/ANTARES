@@ -12,7 +12,8 @@ mod simulation;
 use config::build_ship_from_config;
 use emitters::{Emitter, Ship};
 use movement::{
-    CircleMovement, LineMovement, MovementStrategy, RandomMovement, StationaryMovement,
+    seed_for_ship, CircleMovement, DriftMovement, DriftParams, LineMovement, MovementStrategy,
+    RandomMovement, RouteLeg, RouteMovement, StationaryMovement, WaypointsMovement, ZigzagMovement,
 };
 
 pub use config::{ShipConfig, SimulationConfig};
